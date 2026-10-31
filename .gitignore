@@ -19,3 +19,4 @@ temp_uploads/
 .DS_Store
 Thumbs.db
 *.tmp
+run_calibration.bat
