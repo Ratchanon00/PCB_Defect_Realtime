@@ -6,8 +6,16 @@ import cv2
 import numpy as np
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
+
+from backend.camera_service import camera_service
+from backend.calibration_service import (
+    save_reference, save_manual_corners, load_reference, get_calibration_info,
+    clear_calibration, check_orientation
+)
+from pydantic import BaseModel
+from typing import List
 
 from backend.model_manager import (
     WORKSPACE_DIR,
@@ -104,6 +112,7 @@ def get_dataset_statistics():
 async def detect_defects(
     file: UploadFile = None,
     sample_filename: str = Form(None),
+    image_base64: str = Form(None),
     conf_thresh: float = Form(0.50),
     iou_thresh: float = Form(0.45),
     model_path: str = Form(None)
@@ -124,11 +133,17 @@ async def detect_defects(
                     break
             if not found:
                 raise HTTPException(status_code=404, detail="Sample image not found")
+        elif image_base64:
+            source_name = "live_camera_frame.jpg"
+            if "," in image_base64:
+                image_base64 = image_base64.split(",", 1)[1]
+            import base64
+            img_bytes = base64.b64decode(image_base64)
         elif file is not None:
             source_name = file.filename
             img_bytes = await file.read()
         else:
-            raise HTTPException(status_code=400, detail="Either file or sample_filename must be provided")
+            raise HTTPException(status_code=400, detail="Either file, sample_filename, or image_base64 must be provided")
 
         nparr = np.frombuffer(img_bytes, np.uint8)
         img_bgr = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -150,6 +165,156 @@ async def detect_defects(
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+
+BACKEND_CAMERAS_CACHE = None
+
+@app.get("/api/camera/devices")
+def list_backend_cameras():
+    return {
+        "devices": [
+            {
+                "id": "directshow_0",
+                "index": 0,
+                "name": "USB Camera (DirectShow / USB Microscope)"
+            }
+        ]
+    }
+
+@app.post("/api/camera/start")
+def start_camera_stream(
+    camera_index: int = Form(0),
+    conf_thresh: float = Form(0.50),
+    iou_thresh: float = Form(0.45),
+    model_path: str = Form(None)
+):
+    camera_service.update_settings(
+        conf_thresh=conf_thresh,
+        iou_thresh=iou_thresh,
+        model_path=model_path,
+        auto_detect=True
+    )
+    ok = camera_service.start(camera_index)
+    if not ok:
+        raise HTTPException(status_code=500, detail="Failed to initialize USB camera via DirectShow")
+    return {"status": "ok", "active": True}
+
+@app.post("/api/camera/stop")
+def stop_camera_stream():
+    camera_service.stop()
+    return {"status": "ok", "active": False}
+
+@app.get("/api/camera/stream")
+def get_camera_stream():
+    if not camera_service.is_active():
+        ok = camera_service.start(0)
+        if not ok:
+            raise HTTPException(status_code=500, detail="Cannot start camera stream")
+
+    return StreamingResponse(
+        camera_service.generate_stream(),
+        media_type="multipart/x-mixed-replace; boundary=frame"
+    )
+
+@app.get("/api/camera/telemetry")
+def get_camera_telemetry():
+    return camera_service.get_telemetry()
+
+@app.post("/api/camera/settings")
+def update_camera_settings(
+    conf_thresh: float = Form(None),
+    iou_thresh: float = Form(None),
+    model_path: str = Form(None),
+    auto_detect: bool = Form(None),
+    brightness: float = Form(None)
+):
+    camera_service.update_settings(
+        conf_thresh=conf_thresh,
+        iou_thresh=iou_thresh,
+        model_path=model_path,
+        auto_detect=auto_detect,
+        brightness=brightness
+    )
+    return {"status": "updated"}
+
+@app.post("/api/camera/snapshot")
+def capture_camera_snapshot():
+    try:
+        result = camera_service.capture_snapshot()
+        return JSONResponse(content=result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# =============================================================
+# Calibration Endpoints
+# =============================================================
+
+class CornersPayload(BaseModel):
+    corners: List[List[float]]
+
+@app.post("/api/calibration/save_corners")
+def save_calib_corners(payload: CornersPayload):
+    """Save 4 corners marked interactively by user on camera view."""
+    if not camera_service.is_active():
+        raise HTTPException(status_code=400, detail="กรุณาเปิดกล้องก่อนมาร์กจุด")
+
+    raw = None
+    with camera_service.lock:
+        if camera_service.latest_raw_frame is not None:
+            raw = camera_service.latest_raw_frame.copy()
+
+    if raw is None:
+        raise HTTPException(status_code=500, detail="ไม่พบสัญญาณภาพจากกล้อง")
+
+    result = save_manual_corners(raw, payload.corners)
+    if not result.get("ok"):
+        raise HTTPException(status_code=400, detail=result.get("error", "ไม่สามารถบันทึก 4 มุมได้"))
+
+    return result
+
+@app.get("/api/calibration/status")
+def get_calib_status():
+    return get_calibration_info()
+
+@app.post("/api/calibration/capture")
+def capture_calibration_reference():
+    """Capture current camera frame as reference TOP side image."""
+    if not camera_service.is_active():
+        raise HTTPException(status_code=400, detail="Camera is not active")
+
+    raw = None
+    with camera_service.lock:
+        if camera_service.latest_raw_frame is not None:
+            raw = camera_service.latest_raw_frame.copy()
+
+    if raw is None:
+        raise HTTPException(status_code=500, detail="No camera frame available")
+
+    result = save_reference(raw)
+    if not result.get("ok"):
+        raise HTTPException(status_code=400, detail=result.get("error", "Calibration failed"))
+
+    return result
+
+@app.post("/api/calibration/clear")
+def clear_calib():
+    clear_calibration()
+    return {"status": "cleared"}
+
+@app.get("/api/calibration/check")
+def check_calib_orientation():
+    """Check current camera frame orientation against reference."""
+    if not camera_service.is_active():
+        return {"orientation": "CAMERA_OFF", "label_th": "กล้องปิดอยู่", "match_score": 0}
+
+    raw = None
+    with camera_service.lock:
+        if camera_service.latest_raw_frame is not None:
+            raw = camera_service.latest_raw_frame.copy()
+
+    if raw is None:
+        return {"orientation": "NO_FRAME", "label_th": "ไม่มีภาพจากกล้อง", "match_score": 0}
+
+    return check_orientation(raw)
 
 if os.path.exists(FRONTEND_DIR):
     app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")

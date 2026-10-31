@@ -660,18 +660,9 @@ kbd {
   cursor: grabbing;
 }
 
-/* Laser Scanner Animation */
+/* Laser Scanner Animation - DISABLED */
 .scanner-laser {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent 0%, var(--accent-cyan) 50%, transparent 100%);
-  box-shadow: 0 0 15px var(--accent-cyan), 0 0 30px var(--accent-cyan);
-  opacity: 0;
-  pointer-events: none;
-  z-index: 10;
+  display: none;
 }
 
 .scanner-laser.scanning {
@@ -742,34 +733,50 @@ kbd {
 
 /* Empty State */
 .empty-stage-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  max-width: 420px;
-  padding: 40px 20px;
+  margin: auto;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  gap: 16px;
 }
 
 .empty-icon-wrap {
   width: 64px;
   height: 64px;
-  margin: 0 auto 16px;
-  color: var(--text-dim);
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  color: var(--accent-circuit);
+  flex-shrink: 0;
 }
 
 .empty-icon-wrap svg {
-  width: 100%;
-  height: 100%;
+  width: 32px;
+  height: 32px;
 }
 
 .empty-stage-state h3 {
   font-family: var(--font-display);
   font-size: 1.1rem;
-  color: var(--text-muted);
-  margin-bottom: 8px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.02em;
+  margin: 0;
 }
 
 .empty-stage-state p {
-  font-size: 0.8rem;
-  color: var(--text-dim);
-  line-height: 1.5;
+  display: none !important;
 }
 
 /* Processing Overlay */
@@ -1072,4 +1079,709 @@ kbd {
   .telemetry-sidebar {
     margin-top: 20px;
   }
+}
+
+/* =====================================================================
+   LIVE CAMERA WORKSTATION & CONTROLS STYLES
+   ===================================================================== */
+.header-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.input-mode-switcher {
+  display: flex;
+  background: rgba(13, 18, 29, 0.95);
+  border: 1px solid var(--border-subtle);
+  border-radius: 30px;
+  padding: 3px;
+  gap: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.mode-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 24px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mode-tab-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.mode-tab-btn.active {
+  background: rgba(16, 185, 129, 0.16);
+  border-color: var(--accent-circuit);
+  color: #fff;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.35);
+}
+
+.mode-tab-icon {
+  font-size: 1rem;
+}
+
+.mini-toggle-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  color: var(--text-dim);
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mini-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+}
+
+.sample-bar-section.collapsed {
+  padding: 8px 16px;
+}
+
+.sample-bar-section.collapsed .samples-carousel {
+  display: none;
+}
+
+.sample-bar-section.collapsed .section-headline {
+  margin-bottom: 0;
+}
+
+/* Camera Card Specifics */
+.badge-live {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--accent-red);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.badge-live.active {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--accent-circuit);
+  border: 1px solid var(--accent-circuit);
+  animation: pulse 2s infinite ease-in-out;
+}
+
+.camera-actions-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.cyber-btn.danger-glow {
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.cyber-btn.danger-glow:hover {
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+  transform: translateY(-1px);
+}
+
+.live-detect-box {
+  background: rgba(13, 18, 29, 0.7);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+
+.detect-switch-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.switch-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.switch-title {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.switch-desc {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+}
+
+.cyber-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.cyber-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #1e293b;
+  transition: 0.3s;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: #fff;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+.cyber-switch input:checked + .switch-slider {
+  background-color: var(--accent-circuit);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+
+.cyber-switch input:checked + .switch-slider:before {
+  transform: translateX(18px);
+}
+
+.detect-rate-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.detect-rate-row label {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  margin-bottom: 0;
+}
+
+.cyber-select-sm {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  outline: none;
+}
+
+/* Center Stage Camera Elements */
+.camera-stream-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+#cameraVideo, .camera-stream-image {
+  max-width: 95%;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  display: block;
+}
+
+.camera-canvas-overlay, .camera-overlay-canvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 25;
+}
+
+.camera-canvas-overlay.marking-active, .camera-overlay-canvas.marking-active {
+  pointer-events: auto !important;
+  cursor: crosshair !important;
+}
+
+.camera-hud-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(11, 17, 28, 0.85);
+  border: 1px solid var(--border-subtle);
+  backdrop-filter: blur(8px);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.hud-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.hud-item.highlight {
+  color: var(--accent-cyan);
+  font-weight: 700;
+}
+
+.hud-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-red);
+}
+
+.hud-dot.live-blink {
+  animation: liveBlink 1s infinite alternate ease-in-out;
+}
+
+/* =============================================================
+   Interactive 4-Corner Marking Banner & Crosshair Overlay
+   ============================================================= */
+.corner-marking-banner {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(11, 17, 28, 0.95);
+  border: 1.5px solid var(--accent-cyan);
+  box-shadow: 0 0 25px rgba(6, 182, 212, 0.45);
+  backdrop-filter: blur(12px);
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: #fff;
+  z-index: 50;
+  pointer-events: auto;
+}
+
+.mini-cancel-btn {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #ef4444;
+  border-radius: 12px;
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-body);
+}
+
+.mini-cancel-btn:hover {
+  background: rgba(239, 68, 68, 0.4);
+}
+
+.marking-active {
+  cursor: crosshair !important;
+  pointer-events: auto !important;
+}
+
+@keyframes liveBlink {
+  from { opacity: 0.3; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1.1); box-shadow: 0 0 8px var(--accent-red); }
+}
+
+/* PCB Alignment Guide Overlays */
+.camera-align-guide {
+  position: absolute;
+  width: 80%;
+  height: 80%;
+  max-width: 800px;
+  max-height: 550px;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.guide-corner {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-color: rgba(6, 182, 212, 0.5);
+}
+
+.guide-corner.top-left {
+  top: 0;
+  left: 0;
+  border-top: 2px solid;
+  border-left: 2px solid;
+}
+
+.guide-corner.top-right {
+  top: 0;
+  right: 0;
+  border-top: 2px solid;
+  border-right: 2px solid;
+}
+
+.guide-corner.bottom-left {
+  bottom: 0;
+  left: 0;
+  border-bottom: 2px solid;
+  border-left: 2px solid;
+}
+
+.guide-corner.bottom-right {
+  bottom: 0;
+  right: 0;
+  border-bottom: 2px solid;
+  border-right: 2px solid;
+}
+
+.guide-crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px dashed rgba(6, 182, 212, 0.3);
+}
+
+.center-launch-btn {
+  margin-top: 8px;
+  width: auto;
+  min-width: 230px;
+  max-width: 280px;
+  font-size: 0.95rem;
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.camera-pulse-wrap {
+  animation: cameraPulse 2.5s infinite ease-in-out;
+}
+
+@keyframes cameraPulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.2)); }
+  50% { transform: scale(1.05); filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.5)); }
+}
+
+/* =============================================================
+   Camera Device Label (Static, no dropdown)
+   ============================================================= */
+.camera-device-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(6, 182, 212, 0.08);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: var(--accent-cyan);
+  font-weight: 500;
+}
+
+.device-icon {
+  font-size: 1.1rem;
+}
+
+/* =============================================================
+   Live Detection Clean Panel & Toggle
+   ============================================================= */
+.live-detect-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  margin: 12px 0;
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: var(--radius-sm);
+  transition: all 0.25s ease;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.live-detect-panel:hover {
+  background: rgba(16, 185, 129, 0.09);
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.detect-panel-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.detect-panel-icon {
+  font-size: 1.15rem;
+  color: var(--accent-circuit);
+  filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.4));
+  flex-shrink: 0;
+}
+
+.detect-panel-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.detect-panel-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.detect-panel-desc {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+/* Cyber Toggle Switch */
+.cyber-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+  cursor: pointer;
+  margin: 0;
+}
+
+.cyber-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  transition: all 0.25s ease;
+}
+
+.switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 2px;
+  bottom: 2px;
+  background-color: #64748b;
+  border-radius: 50%;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.cyber-switch input:checked + .switch-slider {
+  background-color: rgba(16, 185, 129, 0.25);
+  border-color: var(--accent-circuit);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+
+.cyber-switch input:checked + .switch-slider:before {
+  transform: translateX(20px);
+  background-color: var(--accent-circuit);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
+}
+
+/* =============================================================
+   Calibration Card
+   ============================================================= */
+.calibration-card {
+  border-color: rgba(234, 179, 8, 0.25);
+}
+
+.calibration-card .card-header h3 {
+  font-size: 0.9rem;
+}
+
+.calib-desc {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+  margin: 0 0 12px 0;
+  padding: 0 4px;
+}
+
+.calibrate-glow {
+  background: linear-gradient(135deg, #b45309, #d97706) !important;
+  border-color: #f59e0b !important;
+  color: #fff !important;
+}
+
+.calibrate-glow:hover:not(:disabled) {
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+}
+
+.calibrate-glow:disabled {
+  opacity: 0.45;
+}
+
+.calib-preview-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 8px;
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 8px;
+}
+
+.calib-ref-thumb {
+  width: 80px;
+  height: 60px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.calib-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.calib-info-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #10b981;
+}
+
+.calib-info-date,
+.calib-info-features {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+.danger-sm {
+  background: rgba(239, 68, 68, 0.15) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+  color: #ef4444 !important;
+  font-size: 0.75rem;
+  padding: 6px 12px;
+  margin-top: 8px;
+}
+
+.danger-sm:hover {
+  background: rgba(239, 68, 68, 0.25) !important;
+}
+
+/* =============================================================
+   Orientation Banner (Overlay on camera feed)
+   ============================================================= */
+.orientation-banner {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  backdrop-filter: blur(12px);
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  max-width: 90%;
+}
+
+.orientation-banner.correct {
+  background: rgba(16, 185, 129, 0.2);
+  border: 1.5px solid rgba(16, 185, 129, 0.5);
+  color: #10b981;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+}
+
+.orientation-banner.wrong {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1.5px solid rgba(239, 68, 68, 0.5);
+  color: #ef4444;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
+  animation: pulseWrong 1.2s infinite ease-in-out;
+}
+
+.orientation-banner.warning {
+  background: rgba(234, 179, 8, 0.2);
+  border: 1.5px solid rgba(234, 179, 8, 0.5);
+  color: #eab308;
+  box-shadow: 0 0 20px rgba(234, 179, 8, 0.15);
+  animation: pulseWarning 1.5s infinite ease-in-out;
+}
+
+.orientation-banner.idle {
+  background: rgba(100, 116, 139, 0.2);
+  border: 1.5px solid rgba(100, 116, 139, 0.3);
+  color: #94a3b8;
+}
+
+@keyframes pulseWrong {
+  0%, 100% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.15); }
+  50% { box-shadow: 0 0 35px rgba(239, 68, 68, 0.35); }
+}
+
+@keyframes pulseWarning {
+  0%, 100% { box-shadow: 0 0 20px rgba(234, 179, 8, 0.15); }
+  50% { box-shadow: 0 0 30px rgba(234, 179, 8, 0.3); }
+}
+
+.orientation-icon {
+  font-size: 1.2rem;
+}
+
+.orientation-text {
+  font-family: 'Chakra Petch', sans-serif;
+  letter-spacing: 0.02em;
 }

@@ -34,11 +34,17 @@ def wait_and_open_browser(url: str, port: int):
             break
 
 def main():
+    if hasattr(sys.stdout, 'reconfigure'):
+        try:
+            sys.stdout.reconfigure(encoding='utf-8')
+        except Exception:
+            pass
+
     port = find_available_port(8000)
     url = f"http://127.0.0.1:{port}"
 
     print("=" * 65)
-    print(" 🚀 PCB DEFECT VISION AI - DASHBOARD SERVER")
+    print(" [*] PCB DEFECT VISION AI - DASHBOARD SERVER")
     print("=" * 65)
     print(f" URL: {url}")
     print(" Initializing PyTorch CUDA & YOLO11m Engine...")

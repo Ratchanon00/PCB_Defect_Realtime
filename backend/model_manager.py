@@ -172,7 +172,7 @@ def crop_defect_patches(orig_img_bgr, boxes, max_patches=12):
 
     return patches
 
-def run_detection(img_bgr, conf_thresh=0.50, iou_thresh=0.45, model_path=None):
+def run_detection(img_bgr, conf_thresh=0.50, iou_thresh=0.45, model_path=None, include_images=True):
     """
     Run YOLO defect detection on an image.
     Returns full analysis dictionary with timing, boxes, images, and crops.
@@ -232,15 +232,19 @@ def run_detection(img_bgr, conf_thresh=0.50, iou_thresh=0.45, model_path=None):
     for idx, b in enumerate(boxes_out):
         b["id"] = idx + 1
 
-    annotated_bgr = draw_industrial_annotations(img_bgr, boxes_out, names)
+    ann_b64 = None
+    orig_b64 = None
+    patches = []
 
-    _, ann_buffer = cv2.imencode('.jpg', annotated_bgr, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
-    ann_b64 = base64.b64encode(ann_buffer).decode('utf-8')
+    if include_images:
+        annotated_bgr = draw_industrial_annotations(img_bgr, boxes_out, names)
+        _, ann_buffer = cv2.imencode('.jpg', annotated_bgr, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
+        ann_b64 = base64.b64encode(ann_buffer).decode('utf-8')
 
-    _, orig_buffer = cv2.imencode('.jpg', img_bgr, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
-    orig_b64 = base64.b64encode(orig_buffer).decode('utf-8')
+        _, orig_buffer = cv2.imencode('.jpg', img_bgr, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
+        orig_b64 = base64.b64encode(orig_buffer).decode('utf-8')
 
-    patches = crop_defect_patches(img_bgr, boxes_out)
+        patches = crop_defect_patches(img_bgr, boxes_out)
 
     distribution = {}
     for b in boxes_out:
